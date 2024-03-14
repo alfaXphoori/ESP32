@@ -1,7 +1,6 @@
 from machine import I2C, Pin, ADC
 from mpl3115a2 import MPL3115A2
 import utime as time
-import BlynkLib
 import ssd1306
 import mlx90614
 
