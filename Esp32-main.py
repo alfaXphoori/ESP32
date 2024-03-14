@@ -35,11 +35,9 @@ def led_read():
     if switch.value() == 1 and led_count == 0:
         led_count=1
         led.value(1)
-        blynk.virtual_write(2,1)
     elif switch.value() == 1 and led_count == 1:
         led_count=0
         led.value(0)
-        blynk.virtual_write(2,0) 
     if led_count==1:
         oled.text('LED: ', 0, 10)
         oled.text('ON', 60, 10)
@@ -88,7 +86,6 @@ def i2c_scan():
 
 while True:
         oled.fill(0)
-        blynk.run()
         i2c_scan()
         led_read()
         analog_read()
