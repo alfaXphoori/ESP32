@@ -4,12 +4,6 @@ import utime as time
 import BlynkLib
 import ssd1306
 import mlx90614
-import network
-
-WIFI_SSID = 'nbAlfa'
-WIFI_PASS = 'qqqqwwww'
-
-BLYNK_AUTH = 'hzzxSocEif6pGw2kbPgaCXxy1nXlmYkg'
 
 i2c = I2C(sda=Pin(21), scl=Pin(22))
 
@@ -36,19 +30,6 @@ time.sleep(1)
 
 led_count=0
 
-def do_connect():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        print('connecting to network...')
-        wlan.connect(WIFI_SSID, WIFI_PASS)
-        while not wlan.isconnected():
-            pass
-    print('network config:', wlan.ifconfig())
-    
-do_connect()
-print("Connecting to Blynk server...")
-blynk = BlynkLib.Blynk(BLYNK_AUTH)
 
 def led_read():
     global led_count
@@ -66,20 +47,9 @@ def led_read():
     elif led_count==0:
         oled.text('LED: ', 0, 10)
         oled.text('OFF', 60, 10)
-
-@blynk.on("V2")
-def blynk_handle_vpins(sw):
-    #print(sw)
-    if(sw == ['1']):
-        led.value(1)
-        #print('Light: ON')
-    if(sw == ['0']):
-        led.value(0)
-        #print('Light: OFF')
         
 def analog_read():
     volume_value = volume.read()
-    blynk.virtual_write(0,volume_value)
     oled.text('Analog: ', 0, 20)
     oled.text(str(volume_value), 60, 20)
     
@@ -87,7 +57,6 @@ def pressure_read():
     pressure = mpl.pressure()
     oled.text('Press: ', 0, 30)
     oled.text(str(pressure), 60, 30)
-    blynk.virtual_write(5,pressure)
     #print(pressure)
 def temp_read():
     amb = sensor.read_ambient_temp()
@@ -98,7 +67,6 @@ def temp_read():
     if obj <= 50:
         oled.text('Object: ', 0, 50)
         oled.text(str(obj), 70, 50)
-        blynk.virtual_write(6,obj)
     time.sleep(0.1)
     
 def i2c_scan():
@@ -120,7 +88,6 @@ def i2c_scan():
     time.sleep(0.1)
 
 while True:
-    try:
         oled.fill(0)
         blynk.run()
         i2c_scan()
@@ -128,7 +95,5 @@ while True:
         analog_read()
         oled.show()
         time.sleep(0.1)
-    except:
-        print("err")
-        pass
+
 
