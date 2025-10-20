@@ -57,9 +57,8 @@
 | 2 | LED | 3 ดวง | สีแดง/เหลือง/เขียว (หรือโมดูลรีเลย์) |
 | 3 | Variable Resistor (VR) | 2 ตัว | 10kΩ Potentiometer |
 | 4 | MLX90614 | 1 ตัว | เซ็นเซอร์อุณหภูมิแบบไม่สัมผัส (I²C) |
-| 5 | ตัวต้านทาน | 3 ตัว | 220Ω–1kΩ (สำหรับ LED) |
-| 6 | สายจัมเปอร์ | ตามต้องการ | Male-Male, Male-Female |
-| 7 | เบรดบอร์ด | 1 ชิ้น | ขนาดมาตรฐาน 830 จุด |
+| 5 | สายจัมเปอร์ | ตามต้องการ | Male-Male, Male-Female |
+
 
 ### 🔌 Pin Configuration (ESP32-S3)
 
@@ -76,53 +75,35 @@
 <tr style="background-color: #ffe6e6;">
 <td>💡 <b>LED 1</b></td>
 <td><code>GPIO 2</code></td>
-<td>🔴 แดง</td>
-<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+
 </tr>
 <tr style="background-color: #fff9e6;">
 <td>💡 <b>LED 2</b></td>
 <td><code>GPIO 4</code></td>
-<td>🟡 เหลือง</td>
-<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+
 </tr>
 <tr style="background-color: #e6ffe6;">
 <td>💡 <b>LED 3</b></td>
 <td><code>GPIO 5</code></td>
-<td>🟢 เขียว</td>
-<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+
 </tr>
 <tr>
 <td>🎛️ <b>VR1</b> (Potentiometer 1)</td>
 <td><code>GPIO 6</code></td>
-<td>-</td>
-<td>3.3V - Signal - GND</td>
+
 </tr>
 <tr>
 <td>🎛️ <b>VR2</b> (Potentiometer 2)</td>
 <td><code>GPIO 7</code></td>
-<td>-</td>
-<td>3.3V - Signal - GND</td>
+
 </tr>
 <tr style="background-color: #e6f3ff;">
 <td>🌡️ <b>MLX90614</b> SDA</td>
 <td><code>GPIO 8</code></td>
-<td>-</td>
-<td rowspan="4">I²C Interface<br>มี pull-up ในตัว</td>
 </tr>
 <tr style="background-color: #e6f3ff;">
 <td>🌡️ <b>MLX90614</b> SCL</td>
 <td><code>GPIO 9</code></td>
-<td>-</td>
-</tr>
-<tr style="background-color: #e6f3ff;">
-<td>🌡️ <b>MLX90614</b> VCC</td>
-<td><code>3.3V</code></td>
-<td>-</td>
-</tr>
-<tr style="background-color: #e6f3ff;">
-<td>🌡️ <b>MLX90614</b> GND</td>
-<td><code>GND</code></td>
-<td>-</td>
 </tr>
 </tbody>
 </table> 
@@ -132,52 +113,8 @@
 ## 📋 งานที่ต้องทำ
 
 ### 1️⃣ ต่อวงจรและความปลอดภัย
-
-<details open>
-<summary><b>💡 การต่อ LED (คลิกเพื่อดูรายละเอียด)</b></summary>
-
-```plaintext
-ESP32-S3 GPIO → Resistor (220Ω-1kΩ) → LED (+) → LED (-) → GND
-```
-
-**ขั้นตอน:**
-- ✅ ต่อ LED 3 ดวง (ใส่ตัวต้านทานป้องกัน)
-- ✅ ตรวจสอบโพลาริตี้ของ LED (ขายาว = +, ขาสั้น = -)
-- ⚠️ **คำเตือน**: ห้ามต่อ LED โดยตรงกับ GPIO จะทำให้ไฟกระชาก!
-
-</details>
-
-<details open>
-<summary><b>🎛️ การต่อ VR (Potentiometer)</b></summary>
-
-```plaintext
-VR1: 3.3V ──┬── Signal (GPIO 6) ──┬── GND
-VR2: 3.3V ──┴── Signal (GPIO 7) ──┴── GND
-```
-
-**ขั้นตอน:**
-- ✅ ขา 1: ต่อกับ 3.3V
-- ✅ ขา 2 (กลาง): ต่อกับ GPIO 6 หรือ 7
-- ✅ ขา 3: ต่อกับ GND
-
-</details>
-
-<details open>
-<summary><b>🌡️ การต่อ MLX90614 (I²C)</b></summary>
-
-```plaintext
-MLX90614        ESP32-S3
-  SDA    ──────→  GPIO 8
-  SCL    ──────→  GPIO 9
-  VCC    ──────→  3.3V
-  GND    ──────→  GND
-```
-
-**หมายเหตุ:**
-- ✅ มี pull-up resistor ในตัวแล้ว ไม่ต้องต่อเพิ่ม
-- ✅ ใช้แรงดัน 3.3V เท่านั้น
-
-</details>
+- ต่อวงจรตาม Pin Configuration ข้างต้น
+- ตรวจสอบการต่อสายให้ถูกต้อง
 
 ### 2️⃣ ตั้งค่า Arduino IDE
 
@@ -254,29 +191,7 @@ graph LR
    BLYNK_TEMPLATE_NAME   "ESP32S3_YourName"
    BLYNK_AUTH_TOKEN      "abcdefgh-1234567890"
    ```
-
-#### ⚠️ ข้อควรระวัง - Wi-Fi
-
-<table>
-<tr>
-<td width="50%" style="background-color: #e8f5e9;">
-
-**✅ ใช้ได้:**
-- 📱 Hotspot มือถือ
-- 🏠 Wi-Fi บ้าน/อพาร์ทเม้นต์
-- 🏢 เครือข่ายที่ไม่มี Captive Portal
-
-</td>
-<td width="50%" style="background-color: #ffebee;">
-
-**❌ ห้ามใช้:**
-- 🏫 Wi-Fi มหาวิทยาลัย (มี Login Page)
-- ☕ Wi-Fi ร้านกาแฟ/ห้างสรรพสินค้า
-- 🔐 Wi-Fi ที่ต้อง Login ผ่านเว็บ
-
-</td>
-</tr>
-</table>
+5. **ตั้งค่า Datastreams** → เพิ่ม Virtual Pins ตามตารางด้านล่าง
 
 ### 4️⃣ เขียนโค้ดให้ทำงานครบ
 
