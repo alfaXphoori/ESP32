@@ -304,6 +304,7 @@ graph LR
 #### ตัวอย่าง Blynk Dashboard
 
 ![Blynk Dashboard](./images/blynk_dashboard.jpg)
+
 *รูปที่ 2: ตัวอย่าง Blynk Dashboard พร้อม Widgets และ Charts*
 
 #### ตัวอย่าง Datastreams Configuration
