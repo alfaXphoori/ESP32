@@ -1,160 +1,477 @@
-# โจทย์สอบปฏิบัติ: ESP32-S3 + Blynk + LEDs + VR(2) + MLX90614
-**นักศึกษา สาขาวิชาวิศวกรรมเครื่องกล ME6831 มหาวิทยาลัยกาฬสินธุ์**
-**ประจำภาคการศึกษา 1/2568**
-**อาจารย์ผู้สอน: ภูริ จันทิมา**
+# 🧪 โจทย์สอบปฏิบัติ: ESP32-S3 + Blynk IoT
+
+<div align="center">
+
+### 📚 นักศึกษา สาขาวิชาวิศวกรรมเครื่องกล ME6831
+### 🏛️ มหาวิทยาลัยกาฬสินธุ์
+### 📅 ประจำภาคการศึกษา 1/2568
+### 👨‍🏫 อาจารย์ผู้สอน: ภูริ จันทิมา
+
+---
+
+**หัวข้อ**: ESP32-S3 + Blynk Cloud + LED Control + Sensors (VR & MLX90614)
+
+</div>
+
+---
 
 ## 🎯 วัตถุประสงค์
 
-1. ตั้งค่าและเชื่อมต่อ ESP32-S3 กับ Blynk Cloud
-2. ควบคุมเอาต์พุต LED ผ่าน Virtual Pins
-3. อ่านค่าอนาล็อกจาก VR 2 ตัว
-4. อ่านอุณหภูมิจาก MLX90614 ผ่าน I²C
-5. ออกแบบหน้าแดชบอร์ด Blynk ให้ดูสถานะ/กราฟแบบเรียลไทม์
+<table>
+<tr>
+<td width="50">1️⃣</td>
+<td>ตั้งค่าและเชื่อมต่อ <b>ESP32-S3</b> กับ <b>Blynk Cloud</b></td>
+</tr>
+<tr>
+<td>2️⃣</td>
+<td>ควบคุมเอาต์พุต <b>LED 3 ดวง</b> ผ่าน Virtual Pins</td>
+</tr>
+<tr>
+<td>3️⃣</td>
+<td>อ่านค่าอนาล็อกจาก <b>VR (Potentiometer) 2 ตัว</b></td>
+</tr>
+<tr>
+<td>4️⃣</td>
+<td>อ่านอุณหภูมิจาก <b>MLX90614</b> (Ambient & Object) ผ่าน I²C</td>
+</tr>
+<tr>
+<td>5️⃣</td>
+<td>ออกแบบหน้าแดชบอร์ด Blynk พร้อม <b>Widgets และ Real-time Charts</b></td>
+</tr>
+</table>
 
 ---
 
 ## 🔧 ฮาร์ดแวร์ที่ใช้
 
-### อุปกรณ์หลัก
-- **ESP32-S3 DevKit (N16R8)**
-- **LED 3 ดวง** (หรือโมดูลรีเลย์/LED ที่เทียบเท่า)
-- **VR (Potentiometer) 2 ตัว**
-- **MLX90614** (เซ็นเซอร์อุณหภูมิแบบไม่สัมผัส I²C)
-- **ตัวต้านทาน 220Ω–1kΩ** (สำหรับ LED)
-- **สายจัมเปอร์**
-- **เบรดบอร์ด**
+### ตัวอย่างการต่อวงจรจริง
 
-### การต่อสาย ESP32-S3
+![Hardware Setup](./images/hardware_setup.jpg)
+*รูปที่ 1: ตัวอย่างการต่อวงจร ESP32-S3 + LEDs + VR + MLX90614 บน KB-STATION*
 
-| อุปกรณ์ | GPIO Pin | 
-|---------|----------|
-| LED 1 | GPIO 2 | 
-| LED 2 | GPIO 4 | 
-| LED 3 | GPIO 5 | 
-| VR1 (Potentiometer 1) | GPIO 6 |
-| VR2 (Potentiometer 2) | GPIO 7 |
-| MLX90614 SDA | GPIO 8 | 
-| MLX90614 SCL | GPIO 9 | 
-| MLX90614 VCC | 3.3V | 
-| MLX90614 GND | GND | 
+### 📦 อุปกรณ์หลัก
+
+| ลำดับ | อุปกรณ์ | จำนวน | รายละเอียด |
+|:---:|---------|:-----:|-----------|
+| 1 | ESP32-S3 DevKit | 1 ชุด | N16R8 (16MB Flash, 8MB PSRAM) |
+| 2 | LED | 3 ดวง | สีแดง/เหลือง/เขียว (หรือโมดูลรีเลย์) |
+| 3 | Variable Resistor (VR) | 2 ตัว | 10kΩ Potentiometer |
+| 4 | MLX90614 | 1 ตัว | เซ็นเซอร์อุณหภูมิแบบไม่สัมผัส (I²C) |
+| 5 | ตัวต้านทาน | 3 ตัว | 220Ω–1kΩ (สำหรับ LED) |
+| 6 | สายจัมเปอร์ | ตามต้องการ | Male-Male, Male-Female |
+| 7 | เบรดบอร์ด | 1 ชิ้น | ขนาดมาตรฐาน 830 จุด |
+
+### 🔌 Pin Configuration (ESP32-S3)
+
+<table>
+<thead>
+<tr>
+<th width="200">อุปกรณ์</th>
+<th width="120">GPIO Pin</th>
+<th width="120">สี LED</th>
+<th>หมายเหตุ</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #ffe6e6;">
+<td>💡 <b>LED 1</b></td>
+<td><code>GPIO 2</code></td>
+<td>🔴 แดง</td>
+<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+</tr>
+<tr style="background-color: #fff9e6;">
+<td>💡 <b>LED 2</b></td>
+<td><code>GPIO 4</code></td>
+<td>🟡 เหลือง</td>
+<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+</tr>
+<tr style="background-color: #e6ffe6;">
+<td>💡 <b>LED 3</b></td>
+<td><code>GPIO 5</code></td>
+<td>🟢 เขียว</td>
+<td>ใช้ตัวต้านทาน 220Ω-1kΩ</td>
+</tr>
+<tr>
+<td>🎛️ <b>VR1</b> (Potentiometer 1)</td>
+<td><code>GPIO 6</code></td>
+<td>-</td>
+<td>3.3V - Signal - GND</td>
+</tr>
+<tr>
+<td>🎛️ <b>VR2</b> (Potentiometer 2)</td>
+<td><code>GPIO 7</code></td>
+<td>-</td>
+<td>3.3V - Signal - GND</td>
+</tr>
+<tr style="background-color: #e6f3ff;">
+<td>🌡️ <b>MLX90614</b> SDA</td>
+<td><code>GPIO 8</code></td>
+<td>-</td>
+<td rowspan="4">I²C Interface<br>มี pull-up ในตัว</td>
+</tr>
+<tr style="background-color: #e6f3ff;">
+<td>🌡️ <b>MLX90614</b> SCL</td>
+<td><code>GPIO 9</code></td>
+<td>-</td>
+</tr>
+<tr style="background-color: #e6f3ff;">
+<td>🌡️ <b>MLX90614</b> VCC</td>
+<td><code>3.3V</code></td>
+<td>-</td>
+</tr>
+<tr style="background-color: #e6f3ff;">
+<td>🌡️ <b>MLX90614</b> GND</td>
+<td><code>GND</code></td>
+<td>-</td>
+</tr>
+</tbody>
+</table> 
 
 ---
 
 ## 📋 งานที่ต้องทำ
 
-### 1. ต่อวงจรและความปลอดภัย
+### 1️⃣ ต่อวงจรและความปลอดภัย
 
-#### การต่อ LED
-```
+<details open>
+<summary><b>💡 การต่อ LED (คลิกเพื่อดูรายละเอียด)</b></summary>
+
+```plaintext
 ESP32-S3 GPIO → Resistor (220Ω-1kΩ) → LED (+) → LED (-) → GND
 ```
-- ต่อ LED 3 ดวง (ใส่ตัวต้านทานป้องกัน)
-- ตรวจสอบโพลาริตี้ของ LED (ขาบวก/ลบ)
 
-#### การต่อ VR (Potentiometer)
-```
-VR1: 3.3V - Signal (GPIO6) - GND
-VR2: 3.3V - Signal (GPIO7) - GND
-```
+**ขั้นตอน:**
+- ✅ ต่อ LED 3 ดวง (ใส่ตัวต้านทานป้องกัน)
+- ✅ ตรวจสอบโพลาริตี้ของ LED (ขายาว = +, ขาสั้น = -)
+- ⚠️ **คำเตือน**: ห้ามต่อ LED โดยตรงกับ GPIO จะทำให้ไฟกระชาก!
 
-#### การต่อ MLX90614 (I²C)
-```
-SDA = GPIO 8
-SCL = GPIO 9
-VCC = 3.3V
-GND = GND
-```
-- มี pull-up resistor ในตัวแล้ว
+</details>
 
-### 2. ตั้งค่า Arduino IDE
+<details open>
+<summary><b>🎛️ การต่อ VR (Potentiometer)</b></summary>
 
-#### การตั้งค่าบอร์ด
-- **Board**: ESP32S3 Dev Module
-- **Flash Size**: 16MB
-- **PSRAM**: Enabled
-- **USB CDC On Boot**: Enabled
-- **Upload Speed**: 921600
-- **CPU Frequency**: 240MHz
-
-#### ติดตั้ง Libraries
-```
-1. Blynk (by Volodymyr Shymanskyy)
-2. Adafruit MLX90614 Library
-3. Adafruit BusIO
+```plaintext
+VR1: 3.3V ──┬── Signal (GPIO 6) ──┬── GND
+VR2: 3.3V ──┴── Signal (GPIO 7) ──┴── GND
 ```
 
-**วิธีติดตั้ง:**
+**ขั้นตอน:**
+- ✅ ขา 1: ต่อกับ 3.3V
+- ✅ ขา 2 (กลาง): ต่อกับ GPIO 6 หรือ 7
+- ✅ ขา 3: ต่อกับ GND
+
+</details>
+
+<details open>
+<summary><b>🌡️ การต่อ MLX90614 (I²C)</b></summary>
+
+```plaintext
+MLX90614        ESP32-S3
+  SDA    ──────→  GPIO 8
+  SCL    ──────→  GPIO 9
+  VCC    ──────→  3.3V
+  GND    ──────→  GND
 ```
-Sketch → Include Library → Manage Libraries → ค้นหาและติดตั้ง
+
+**หมายเหตุ:**
+- ✅ มี pull-up resistor ในตัวแล้ว ไม่ต้องต่อเพิ่ม
+- ✅ ใช้แรงดัน 3.3V เท่านั้น
+
+</details>
+
+### 2️⃣ ตั้งค่า Arduino IDE
+
+#### ⚙️ การตั้งค่าบอร์ด
+
+| พารามิเตอร์ | ค่าที่ตั้ง |
+|------------|-----------|
+| 🔧 **Board** | `ESP32S3 Dev Module` |
+| 💾 **Flash Size** | `16MB` |
+| 🧠 **PSRAM** | `Enabled` (OPI PSRAM) |
+| 🔌 **USB CDC On Boot** | `Enabled` |
+| ⚡ **Upload Speed** | `921600` |
+| 🚀 **CPU Frequency** | `240MHz (WiFi)` |
+| 📡 **Core Debug Level** | `None` (หรือ Info สำหรับ debug) |
+
+#### 📚 ติดตั้ง Libraries
+
+<table>
+<tr>
+<th width="50">ลำดับ</th>
+<th>Library Name</th>
+<th>ผู้พัฒนา</th>
+<th>เวอร์ชันแนะนำ</th>
+</tr>
+<tr>
+<td align="center">1</td>
+<td><code>Blynk</code></td>
+<td>Volodymyr Shymanskyy</td>
+<td>≥ 1.3.2</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td><code>Adafruit MLX90614 Library</code></td>
+<td>Adafruit</td>
+<td>≥ 2.1.3</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td><code>Adafruit BusIO</code></td>
+<td>Adafruit</td>
+<td>≥ 1.14.5</td>
+</tr>
+</table>
+
+**📥 วิธีติดตั้ง:**
+```arduino
+Arduino IDE → Sketch → Include Library → Manage Libraries
+→ ค้นหาชื่อ Library → คลิก Install
 ```
 
-### 3. เชื่อมต่อ Blynk Cloud
+### 3️⃣ เชื่อมต่อ Blynk Cloud
 
-#### ขั้นตอนการสร้าง Template
-1. เข้า [Blynk Cloud](https://blynk.cloud/)
-2. สร้าง Template ใหม่
-3. บันทึก:
-   - `BLYNK_TEMPLATE_ID`
-   - `BLYNK_TEMPLATE_NAME`
-   - `BLYNK_AUTH_TOKEN`
+#### 🌐 ขั้นตอนการสร้าง Template
 
-#### ข้อควรระวัง
-- ใช้ Wi-Fi ที่ไม่มี captive portal
-- แนะนำ: Hotspot มือถือหรือเครือข่ายปกติ
-- **หลีกเลี่ยง**: Wi-Fi สาธารณะที่ต้อง login ผ่านหน้าเว็บ
+```mermaid
+graph LR
+    A[🌐 เข้า Blynk.cloud] --> B[➕ New Template]
+    B --> C[⚙️ ตั้งค่า Template]
+    C --> D[💾 บันทึกข้อมูล]
+    D --> E[✅ สำเร็จ]
+```
 
-### 4. เขียนโค้ดให้ทำงานครบ
+**📝 ขั้นตอนละเอียด:**
 
-#### Virtual Pins Assignment
+1. **เข้าสู่ระบบ** → [Blynk Cloud Console](https://blynk.cloud/)
+2. **สร้าง Template** → คลิก `+ New Template`
+3. **กรอกข้อมูล:**
+   - 📛 **Name**: `ESP32S3_<ชื่อของคุณ>`
+   - 🔧 **Hardware**: `ESP32`
+   - 📡 **Connection Type**: `WiFi`
+4. **บันทึกข้อมูลสำคัญ:**
+   ```cpp
+   BLYNK_TEMPLATE_ID     "TMPLxxxxxx"
+   BLYNK_TEMPLATE_NAME   "ESP32S3_YourName"
+   BLYNK_AUTH_TOKEN      "abcdefgh-1234567890"
+   ```
 
-| Virtual Pin | ฟังก์ชัน | ทิศทาง |
-|-------------|---------|--------|
-| V0 | ควบคุม LED1 (GPIO2) | Input (จาก Blynk) |
-| V1 | ควบคุม LED2 (GPIO4) | Input (จาก Blynk) |
-| V2 | ควบคุม LED3 (GPIO5) | Input (จาก Blynk) |
-| V3 | แสดงค่า VR1 (0-4095) | Output (ไป Blynk) |
-| V4 | แสดงค่า VR2 (0-4095) | Output (ไป Blynk) |
-| V5 | อุณหภูมิ Ambient (°C) | Output (ไป Blynk) |
-| V6 | อุณหภูมิ Object (°C) | Output (ไป Blynk) |
+#### ⚠️ ข้อควรระวัง - Wi-Fi
 
-#### โครงสร้างโค้ด
+<table>
+<tr>
+<td width="50%" style="background-color: #e8f5e9;">
+
+**✅ ใช้ได้:**
+- 📱 Hotspot มือถือ
+- 🏠 Wi-Fi บ้าน/อพาร์ทเม้นต์
+- 🏢 เครือข่ายที่ไม่มี Captive Portal
+
+</td>
+<td width="50%" style="background-color: #ffebee;">
+
+**❌ ห้ามใช้:**
+- 🏫 Wi-Fi มหาวิทยาลัย (มี Login Page)
+- ☕ Wi-Fi ร้านกาแฟ/ห้างสรรพสินค้า
+- 🔐 Wi-Fi ที่ต้อง Login ผ่านเว็บ
+
+</td>
+</tr>
+</table>
+
+### 4️⃣ เขียนโค้ดให้ทำงานครบ
+
+#### 📍 Virtual Pins Assignment
+
+<table>
+<thead>
+<tr>
+<th width="100">Virtual Pin</th>
+<th width="250">ฟังก์ชัน</th>
+<th width="120">ทิศทาง</th>
+<th width="100">Data Type</th>
+<th>ช่วงค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #fff3e0;">
+<td align="center"><code>V0</code></td>
+<td>🔴 ควบคุม LED1 (GPIO2)</td>
+<td>⬅️ Input</td>
+<td>Integer</td>
+<td>0-1</td>
+</tr>
+<tr style="background-color: #fff3e0;">
+<td align="center"><code>V1</code></td>
+<td>🟡 ควบคุม LED2 (GPIO4)</td>
+<td>⬅️ Input</td>
+<td>Integer</td>
+<td>0-1</td>
+</tr>
+<tr style="background-color: #fff3e0;">
+<td align="center"><code>V2</code></td>
+<td>🟢 ควบคุม LED3 (GPIO5)</td>
+<td>⬅️ Input</td>
+<td>Integer</td>
+<td>0-1</td>
+</tr>
+<tr style="background-color: #e3f2fd;">
+<td align="center"><code>V3</code></td>
+<td>🎛️ แสดงค่า VR1</td>
+<td>➡️ Output</td>
+<td>Integer</td>
+<td>0-4095</td>
+</tr>
+<tr style="background-color: #e3f2fd;">
+<td align="center"><code>V4</code></td>
+<td>🎛️ แสดงค่า VR2</td>
+<td>➡️ Output</td>
+<td>Integer</td>
+<td>0-4095</td>
+</tr>
+<tr style="background-color: #f3e5f5;">
+<td align="center"><code>V5</code></td>
+<td>🌡️ อุณหภูมิ Ambient (°C)</td>
+<td>➡️ Output</td>
+<td>Double</td>
+<td>0-50</td>
+</tr>
+<tr style="background-color: #f3e5f5;">
+<td align="center"><code>V6</code></td>
+<td>🌡️ อุณหภูมิ Object (°C)</td>
+<td>➡️ Output</td>
+<td>Double</td>
+<td>0-100</td>
+</tr>
+</tbody>
+</table>
+
+#### 📝 โครงสร้างโค้ด
 
 ```cpp
-// ต้องมีส่วนประกอบหลัก:
-1. การเชื่อมต่อ Wi-Fi
-2. การเชื่อมต่อ Blynk
-3. BLYNK_WRITE() สำหรับ V0, V1, V2
-4. อ่านค่า VR1, VR2 (analogRead)
-5. อ่านค่า MLX90614 (I²C)
-6. ส่งข้อมูลไป Blynk (Blynk.virtualWrite)
-7. Reconnect mechanism
-8. Serial debug messages
+// ✅ ส่วนประกอบหลักที่ต้องมี:
+
+// 1️⃣ Wi-Fi Connection
+   ├── WiFi.begin(ssid, password)
+   ├── WiFi.status() check
+   └── Auto-reconnect mechanism
+
+// 2️⃣ Blynk Connection
+   ├── Blynk.config(auth)
+   ├── Blynk.connect()
+   └── Blynk.connected() check
+
+// 3️⃣ LED Control (BLYNK_WRITE)
+   ├── BLYNK_WRITE(V0) → digitalWrite(LED1)
+   ├── BLYNK_WRITE(V1) → digitalWrite(LED2)
+   └── BLYNK_WRITE(V2) → digitalWrite(LED3)
+
+// 4️⃣ Read Analog Values
+   ├── analogRead(VR1_PIN) → V3
+   └── analogRead(VR2_PIN) → V4
+
+// 5️⃣ Read MLX90614 (I²C)
+   ├── mlx.readAmbientTempC() → V5
+   └── mlx.readObjectTempC() → V6
+
+// 6️⃣ Send to Blynk
+   └── Blynk.virtualWrite(Vx, value)
+
+// 7️⃣ Serial Debug
+   └── Serial.println() messages
 ```
+
+**💡 เทคนิคการเขียนโค้ด:**
+- ใช้ `BlynkTimer` สำหรับอ่านเซ็นเซอร์ (ทุก 1-2 วินาที)
+- ตรวจสอบ `Blynk.connected()` ก่อนส่งข้อมูล
+- เพิ่ม `Serial.println()` เพื่อ debug
+- ใช้ `delay()` น้อยที่สุด ให้ใช้ `timer` แทน
 
 ### 5. ออกแบบแดชบอร์ด Blynk
 
-#### Widget ที่ต้องมี (บังคับ)
+#### ตัวอย่าง Blynk Dashboard
 
-1. **ปุ่มควบคุม LED (3 ปุ่ม)**
-   - SW1 → V0 (GPIO2)
-   - SW2 → V1 (GPIO4)
-   - SW3 → V2 (GPIO5)
-   - Mode: Switch
+![Blynk Dashboard](./images/blynk_dashboard.jpg)
+*รูปที่ 2: ตัวอย่าง Blynk Dashboard พร้อม Widgets และ Charts*
 
-2. **แสดงค่า VR (2 widgets)**
-   - VR1 → V3 (ช่วง: 0-4096)
-   - VR2 → V4 (ช่วง: 0-4096)
-   - Widget: Gauge หรือ Value Display
+#### ตัวอย่าง Datastreams Configuration
 
-3. **แสดงอุณหภูมิ (2 widgets)**
-   - Ambient → V5 (ช่วง: 0-50 °C)
-   - Object → V6 (ช่วง: 0-50 °C)
-   - Widget: Gauge หรือ Value Display
+![Blynk Datastreams](./images/blynk_datastreams.jpg)
+*รูปที่ 3: การตั้งค่า Datastreams (Virtual Pins V0-V6)*
 
-4. **กราฟ SuperChart (บังคับ)**
-   - Ambient Temperature (V5)
-   - Object Temperature (V6)
-   - **แนะนำเพิ่ม**: VR1 (V3), VR2 (V4)
+#### 🎨 Widget ที่ต้องมี (บังคับ)
+
+<table>
+<thead>
+<tr>
+<th width="150">Widget Type</th>
+<th width="120">Virtual Pin</th>
+<th width="200">Label/ชื่อ</th>
+<th>การตั้งค่า</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #ffebee;">
+<td>🔘 <b>Switch</b></td>
+<td><code>V0</code></td>
+<td>SW1 (LED Red)</td>
+<td>Mode: Switch, Color: Red</td>
+</tr>
+<tr style="background-color: #fffde7;">
+<td>🔘 <b>Switch</b></td>
+<td><code>V1</code></td>
+<td>SW2 (LED Yellow)</td>
+<td>Mode: Switch, Color: Orange</td>
+</tr>
+<tr style="background-color: #e8f5e9;">
+<td>🔘 <b>Switch</b></td>
+<td><code>V2</code></td>
+<td>SW3 (LED Green)</td>
+<td>Mode: Switch, Color: Green</td>
+</tr>
+<tr style="background-color: #e1f5fe;">
+<td>📊 <b>Gauge</b></td>
+<td><code>V3</code></td>
+<td>VR1</td>
+<td>Min: 0, Max: 4096, Reading Rate: PUSH</td>
+</tr>
+<tr style="background-color: #e1f5fe;">
+<td>📊 <b>Gauge</b></td>
+<td><code>V4</code></td>
+<td>VR2</td>
+<td>Min: 0, Max: 4096, Reading Rate: PUSH</td>
+</tr>
+<tr style="background-color: #fce4ec;">
+<td>🌡️ <b>Gauge</b></td>
+<td><code>V5</code></td>
+<td>Ambient °C</td>
+<td>Min: 0, Max: 50, Units: °C</td>
+</tr>
+<tr style="background-color: #fce4ec;">
+<td>🌡️ <b>Gauge</b></td>
+<td><code>V6</code></td>
+<td>Object °C</td>
+<td>Min: 0, Max: 50, Units: °C</td>
+</tr>
+<tr style="background-color: #f3e5f5;">
+<td>📈 <b>Chart</b></td>
+<td><code>V5</code></td>
+<td>Ambient °C</td>
+<td>Time Range: 1h, Update: 1s</td>
+</tr>
+<tr style="background-color: #f3e5f5;">
+<td>📈 <b>Chart</b></td>
+<td><code>V6</code></td>
+<td>Object °C</td>
+<td>Time Range: 1h, Update: 1s</td>
+</tr>
+</tbody>
+</table>
+
+**📌 การตั้งค่า Widget แนะนำ:**
+- ✅ **Update Interval**: 1-2 วินาที
+- ✅ **Reading Rate**: PUSH (ให้ ESP32 ส่งข้อมูลเอง)
+- ✅ **Time Range** (Chart): 1 hour
+- ✅ **Label**: ใช้ภาษาไทยหรืออังกฤษที่เข้าใจง่าย
 
 ---
 
@@ -188,6 +505,7 @@ Sketch → Include Library → Manage Libraries → ค้นหาและต�
 - ✓ ค่าอุณหภูมิมีความสมเหตุสมผล
 
 ### หมวด F: ออกแบบแดชบอร์ด Blynk (2 คะแนน)
+- ✓ ตั้งชื่อ Dashboard ว่า ESP32S3_Name (*Name = ชื่อนักศึกษา*) 
 - ✓ มีปุ่ม SW1–SW3 ครบถ้วน
 - ✓ มีเกจ/ตัวเลข VR1/VR2
 - ✓ มีเกจอุณหภูมิ (Ambient/Object)
@@ -213,31 +531,89 @@ Sketch → Include Library → Manage Libraries → ค้นหาและต�
    - ถ่ายให้เห็นการต่อสายชัดเจน
    - แสดง LED ที่ทำงานจริง
 
-### เคล็ดลับการทำข้อสอบ
+### ตัวอย่างภาพประกอบ
 
-1. **ทดสอบการต่อวงจรก่อนเขียนโค้ด**
-   - ทดสอบ LED ด้วยโค้ด Blink อง่ายๆ
+#### 1. การต่อวงจรบน Breadboard
+![Hardware Setup Example](./images/hardware_setup.jpg)
 
-2. **ทดสอบทีละโมดูล**
-   - LED → VR → MLX90614 → Blynk
+#### 2. Blynk Dashboard ที่ใช้งานจริง
+![Blynk Dashboard Example](./images/blynk_dashboard.jpg)
 
-3. **ใช้ Serial Monitor ตรวจสอบ**
-   - เปิดบอร์ดเรต 115200
-   - ดูค่าที่อ่านได้จริง
+#### 3. การตั้งค่า Virtual Pins (Datastreams)
+![Blynk Datastreams Configuration](./images/blynk_datastreams.jpg)
 
-4. **จัดการ Blynk Template ให้เรียบร้อย**
-   - บันทึก Auth Token ไว้
-   - ตั้งค่า Virtual Pin ก่อนเขียนโค้ด
+### 💡 เคล็ดลับการทำข้อสอบ
 
-5. **ทำแดชบอร์ดให้สวยงาม**
-   - จัดวาง Widget ให้เป็นระเบียบ
-   - ใส่ Label ที่ชัดเจน
-   - เลือกสีที่เหมาะสม
+<table>
+<tr>
+<td width="50">1️⃣</td>
+<td width="250"><b>ทดสอบการต่อวงจรก่อนเขียนโค้ด</b></td>
+<td>
+• ทดสอบ LED ด้วยโค้ด Blink อง่ายๆ<br>
+• ตรวจสอบแรงดันด้วย Multimeter<br>
+• ตรวจสอบโพลาริตี้ของ LED
+</td>
+</tr>
+<tr>
+<td>2️⃣</td>
+<td><b>ทดสอบทีละโมดูล</b></td>
+<td>
+LED → VR → MLX90614 → Blynk<br>
+(ทดสอบทีละส่วนก่อนรวมเป็นโปรเจคใหญ่)
+</td>
+</tr>
+<tr>
+<td>3️⃣</td>
+<td><b>ใช้ Serial Monitor ตรวจสอบ</b></td>
+<td>
+• เปิดบอร์ดเรต 115200<br>
+• ดูค่าที่อ่านได้จริง<br>
+• ตรวจสอบสถานะ Wi-Fi/Blynk
+</td>
+</tr>
+<tr>
+<td>4️⃣</td>
+<td><b>จัดการ Blynk Template ให้เรียบร้อย</b></td>
+<td>
+• บันทึก Auth Token ไว้ในที่ปลอดภัย<br>
+• ตั้งค่า Datastreams ก่อนเขียนโค้ด<br>
+• ตรวจสอบ Virtual Pin ให้ตรงกัน
+</td>
+</tr>
+<tr>
+<td>5️⃣</td>
+<td><b>ทำแดชบอร์ดให้สวยงาม</b></td>
+<td>
+• จัดวาง Widget ให้เป็นระเบียบ<br>
+• ใส่ Label ที่ชัดเจน เข้าใจง่าย<br>
+• เลือกสีที่เหมาะสมกับแต่ละ Widget
+</td>
+</tr>
+</table>
 
 ---
 
-## 👨‍🏫 ติดต่อ อาจารย์ภูริ จันทิมา
+## � ติดต่อ & สนับสนุน
 
-หากมีข้อสงสัยเพิ่มเติม กรุณาติดต่อผู้สอนผ่าน เบอร์โทรศัพท์ 087-2273357
+<div align="center">
 
-**สอบให้สนุก!** 🚀
+### 👨‍🏫 อาจารย์ภูริ จันทิมา
+
+📱 **โทรศัพท์**: [087-2273357](tel:0872273357)
+
+📧 **อีเมล**: [phoori.ch@ksu.ac.th]
+
+🏛️ **สาขาวิชา**: วิศวกรรมคอมพิวเตอร์ฺ 
+มหาวิทยาลัยกาฬสินธุ์
+
+---
+
+### 🎓 ขอให้นักศึกษาทุกคนสอบให้สนุกและประสบความสำเร็จ! 🚀
+
+**"การเรียนรู้ IoT คือการเชื่อมต่ออนาคต"** �
+
+---
+
+<sub>เอกสารนี้จัดทำขึ้นเพื่อการศึกษา | อัปเดตล่าสุด: ภาคการศึกษา 1/2568</sub>
+
+</div>
