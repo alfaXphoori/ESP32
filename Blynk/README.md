@@ -65,7 +65,7 @@
 <table>
 <thead>
 <tr>
-<th width="200">อุปกรณ์</th>
+<th width="250">อุปกรณ์</th>
 <th width="120">GPIO Pin</th>
 </tr>
 </thead>
