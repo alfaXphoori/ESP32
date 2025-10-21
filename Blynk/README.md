@@ -157,39 +157,11 @@
 </tr>
 </table>
 
-**📥 วิธีติดตั้ง:**
-```arduino
-Arduino IDE → Sketch → Include Library → Manage Libraries
-→ ค้นหาชื่อ Library → คลิก Install
-```
-
 ### 3️⃣ เชื่อมต่อ Blynk Cloud
-
-#### 🌐 ขั้นตอนการสร้าง Template
-
-```mermaid
-graph LR
-    A[🌐 เข้า Blynk.cloud] --> B[➕ New Template]
-    B --> C[⚙️ ตั้งค่า Template]
-    C --> D[💾 บันทึกข้อมูล]
-    D --> E[✅ สำเร็จ]
-```
-
-**📝 ขั้นตอนละเอียด:**
-
-1. **เข้าสู่ระบบ** → [Blynk Cloud Console](https://blynk.cloud/)
-2. **สร้าง Template** → คลิก `+ New Template`
-3. **กรอกข้อมูล:**
-   - 📛 **Name**: `ESP32S3_<ชื่อของคุณ>`
-   - 🔧 **Hardware**: `ESP32`
-   - 📡 **Connection Type**: `WiFi`
-4. **บันทึกข้อมูลสำคัญ:**
-   ```cpp
-   BLYNK_TEMPLATE_ID     "TMPLxxxxxx"
-   BLYNK_TEMPLATE_NAME   "ESP32S3_YourName"
-   BLYNK_AUTH_TOKEN      "abcdefgh-1234567890"
-   ```
-5. **ตั้งค่า Datastreams** → เพิ่ม Virtual Pins ตามตารางด้านล่าง
+1. **สร้าง Template** → กำหนดชื่อ Template และ Device
+2. **สร้าง Dashboard** → เชื่อมโยงกับ Template ที่สร้าง
+3. **ตั้งค่า Datastreams** → เพิ่ม Virtual Pins ตามตารางด้านล่าง
+4. **แสดงผลลัพธ์** → ทดสอบการเชื่อมต่อกับ Blynk Cloud
 
 ### 4️⃣ เขียนโค้ดให้ทำงานครบ
 
@@ -253,7 +225,7 @@ graph LR
 <td>🌡️ อุณหภูมิ Object (°C)</td>
 <td>➡️ Output</td>
 <td>Double</td>
-<td>0-100</td>
+<td>0-50</td>
 </tr>
 </tbody>
 </table>
@@ -292,12 +264,6 @@ graph LR
 // 7️⃣ Serial Debug
    └── Serial.println() messages
 ```
-
-**💡 เทคนิคการเขียนโค้ด:**
-- ใช้ `BlynkTimer` สำหรับอ่านเซ็นเซอร์ (ทุก 1-2 วินาที)
-- ตรวจสอบ `Blynk.connected()` ก่อนส่งข้อมูล
-- เพิ่ม `Serial.println()` เพื่อ debug
-- ใช้ `delay()` น้อยที่สุด ให้ใช้ `timer` แทน
 
 ### 5. ออกแบบแดชบอร์ด Blynk
 
