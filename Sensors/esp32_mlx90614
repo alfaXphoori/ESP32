@@ -28,22 +28,6 @@
 
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
-void taskSendMLX() {
-  static bool mlx_ok = true;
-  if (!mlx_ok) return; // หาก init fail จะไม่อ่านซ้ำทุกครั้ง
-
-  // อ่านเป็น °C
-  double ta = mlx.readAmbientTempC();
-  double to = mlx.readObjectTempC();
-
-  // ไลบรารีจะคืน NAN ถ้าอ่านไม่สำเร็จ
-  if (isnan(ta) || isnan(to)) {
-    Serial.println("[MLX90614] Read failed (NaN). Check wiring/addr.");
-    mlx_ok = false; // กัน spam
-    return;
-  }
-}
-
 // ---------------- Setup & Loop ----------------
 void setup() {
   Serial.begin(115200);
