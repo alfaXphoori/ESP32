@@ -1,0 +1,68 @@
+/**************************************************************
+ * ESP32-S3 DevKit (N16R8) + Arduino IDE 2.3.6
+ * Blynk + LEDs + 2x VR + MLX90614 (I2C)
+ * - V0/V1/V2 : Switch -> GPIO 2/4/5 (LEDs)
+ * - V3       : VR1 (GPIO 6)  analogRead 0..4095
+ * - V4       : VR2 (GPIO 7)  analogRead 0..4095
+ * - V5       : MLX90614 Ambient °C
+ * - V6       : MLX90614 Object  °C
+ **************************************************************/
+
+// ---------- LEDs ----------
+#define LED0_PIN 2
+#define LED1_PIN 4
+#define LED2_PIN 5
+
+#ifndef LED_ACTIVE_LOW
+#define LED_ACTIVE_LOW 0
+#endif
+
+// ---------- I2C pins for MLX90614 ----------
+#define I2C_SDA 8
+#define I2C_SCL 9
+#define I2C_FREQ 100000UL  // 100 kHz
+
+
+#include <Wire.h>
+#include <Adafruit_MLX90614.h>
+
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
+
+// ---------------- Setup & Loop ----------------
+void setup() {
+  Serial.begin(115200);
+  delay(200);
+  Serial.println("\nBoot...");
+
+  // LEDs
+  pinMode(LED0_PIN, OUTPUT);
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
+
+  // I2C + MLX90614
+  Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
+  if (!mlx.begin()) { // default address 0x5A
+    Serial.println("[MLX90614] Not found at default addr (0x5A). Check wiring/pullups.");
+  } else {
+    Serial.println("[MLX90614] Sensor initialized.");
+  }
+}
+
+void loop() {
+    static bool mlx_ok = true;
+  if (!mlx_ok) return; // หาก init fail จะไม่อ่านซ้ำทุกครั้ง
+
+  // อ่านเป็น °C
+  double ta = mlx.readAmbientTempC();
+  double to = mlx.readObjectTempC();
+
+  // ไลบรารีจะคืน NAN ถ้าอ่านไม่สำเร็จ
+  if (isnan(ta) || isnan(to)) {
+    Serial.println("[MLX90614] Read failed (NaN). Check wiring/addr.");
+    mlx_ok = false; // กัน spam
+    return;
+  }
+
+  Serial.printf("MLX90614: Ambient=%.2f °C  Object=%.2f °C\n", ta, to);
+  delay(1000);
+}
